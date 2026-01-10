@@ -142,6 +142,8 @@ ZMK is actively being developed and there are a few features that will be added 
 - Layer Lock - [Open PR](https://github.com/zmkfirmware/zmk/pull/1984)
 - Unicode Support - [Issue](https://github.com/zmkfirmware/zmk/issues/232)
 
+#### Bump from Ed
+
 ## Credits
 
 - [eigatech](https://github.com/eigatech)
