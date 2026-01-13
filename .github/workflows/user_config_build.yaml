@@ -62,6 +62,7 @@ jobs:
 
       - name: Create build directory
         run: |
+          set -x
           echo "build_dir=$(mktemp -d)" >> $GITHUB_ENV
 
       - name: Prepare variables
@@ -74,6 +75,7 @@ jobs:
           artifact_name: ${{ matrix.artifact-name }}
           snippet: ${{ matrix.snippet }}
         run: |
+          set -x
           if [ -e zephyr/module.yml ]; then
             export zmk_load_arg=" -DZMK_EXTRA_MODULES='${GITHUB_WORKSPACE}'"
             new_tmp_dir="${TMPDIR:-/tmp}/zmk-config"
@@ -100,9 +102,10 @@ jobs:
           echo "GITHUB_WORKSPACE=================="
           echo "$GITHUB_WORKSPACE"
           echo "Current dir: $(pwd)"
-          echo ls -la
+          ls -lR $GITHUB_WORKSPACE
           echo "github.workspace================"
           echo "${{ github.workspace }}"
+          echo "$new_temp_dir"
 
       - name: Download keymaps
         uses: actions/download-artifact@v4
@@ -112,6 +115,7 @@ jobs:
 
       - name: Copy keymaps to keymap directory
         run: |
+          set -x
           rm -f $GITHUB_WORKSPACE/config/*.keymap
           mkdir -p "$GITHUB_WORKSPACE/${{ inputs.keymap_path }}/"
           cd "$GITHUB_WORKSPACE"
@@ -121,6 +125,7 @@ jobs:
 
       - name: Copy config files to isolated temporary directory
         run: |
+          set -x
           echo " evn.base_dir ----------------------------------"
           echo "${{ env.base_dir }}"
           if [ "${{ env.base_dir }}" != "${GITHUB_WORKSPACE}" ]; then
@@ -189,25 +194,41 @@ jobs:
             ${{ runner.os }}-build-
             ${{ runner.os }}-
 
+      - name: Print Dirs
+        working-directory: ${{ env.base_dir }}
+        run: |
+          echo "env.bash_dir:  ${{ env.base_dir }}"
+          echo "cur dir: ($pwd)"
+          tree "${{ env.base_dir }}"
+
       - name: West Init
         working-directory: ${{ env.base_dir }}
-        run: west init -l "${{ env.base_dir }}/${{ inputs.config_path }}"
+        run: |
+          set -x
+          west init -l "${{ env.base_dir }}/${{ inputs.config_path }}"
 
       - name: West Update
         working-directory: ${{ env.base_dir }}
-        run: west update
+        run: |
+          set -x
+          west update
 
       - name: West Zephyr export
         working-directory: ${{ env.base_dir }}
-        run: west zephyr-export
+        run: |
+          set -x
+          west zephyr-export
 
       - name: West Build (${{ env.display_name }})
         working-directory: ${{ env.base_dir }}
         shell: sh -x {0}
-        run: west build --pristine -s zmk/app -d "${{ env.build_dir }}" -b "${{ matrix.board }}" ${{ env.extra_west_args }} -- -DZMK_CONFIG=${{ env.base_dir }}/${{ inputs.config_path }} ${{ env.extra_cmake_args }} ${{ matrix.cmake-args }}
+        run: |  
+          set -x
+          west build --pristine -s zmk/app -d "${{ env.build_dir }}" -b "${{ matrix.board }}" ${{ env.extra_west_args }} -- -DZMK_CONFIG=${{ env.base_dir }}/${{ inputs.config_path }} ${{ env.extra_cmake_args }} ${{ matrix.cmake-args }}
 
       - name: ${{ env.display_name }} Kconfig file
         run: |
+          set -x
           if [ -f "${{ env.build_dir }}/zephyr/.config" ]
           then
             grep -v -e "^#" -e "^$" "${{ env.build_dir }}/zephyr/.config" | sort
@@ -218,6 +239,7 @@ jobs:
 
       - name: ${{ env.display_name }} Devicetree file
         run: |
+          set -x
           if [ -f "${{ env.build_dir }}/zephyr/zephyr.dts" ]
           then
             cat "${{ env.build_dir }}/zephyr/zephyr.dts"
@@ -232,6 +254,7 @@ jobs:
       - name: Rename artifacts
         shell: sh -x {0}
         run: |
+          set -x
           mkdir "${{ env.build_dir }}/artifacts"
           if [ -f "${{ env.build_dir }}/zephyr/zmk.uf2" ]
           then
