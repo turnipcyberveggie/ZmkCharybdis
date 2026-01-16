@@ -1,4 +1,4 @@
-name: Reusable user config build
+name: Reusable user config buildAA
 
 on:
   workflow_call:
@@ -70,7 +70,7 @@ jobs:
         run: |
           echo "env.bash_dir:  ${{ env.base_dir }}"
           echo "cur dir: ($pwd)"
-          tree "${{ env.base_dir }}"
+          ls -lR "${{ env.base_dir }}"
       
       - name: Prepare variables
         shell: sh -x {0}
