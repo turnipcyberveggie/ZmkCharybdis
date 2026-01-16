@@ -65,6 +65,13 @@ jobs:
           set -x
           echo "build_dir=$(mktemp -d)" >> $GITHUB_ENV
 
+      - name: Print Dirs AAAA
+        working-directory: ${{ env.base_dir }}
+        run: |
+          echo "env.bash_dir:  ${{ env.base_dir }}"
+          echo "cur dir: ($pwd)"
+          tree "${{ env.base_dir }}"
+      
       - name: Prepare variables
         shell: sh -x {0}
         env:
